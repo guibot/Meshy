@@ -14,19 +14,19 @@
 #define NODE_LOCATION   "CENTRAL"
 
 // ── Timing ────────────────────────────────────────────────────────────────────
-#define SEND_INTERVAL     30000   // ms between sensor broadcasts (node)
+#define SEND_INTERVAL     5000   // ms between sensor broadcasts (node)
 #define DISPLAY_INTERVAL   1000   // ms between display refresh (root)
 
 // ── Pins (node) ───────────────────────────────────────────────────────────────
 #define MODE_BUTTON_PIN   0    // hold LOW on boot → ROOT mode this session
-#define POT_PIN          34    // analog potentiometer — ADC1 only (32-39)
+#define POT_PIN           4    // analog potentiometer — ESP32-C3 ADC pins: 0-4 only
 #define BUTTON_PIN       10    // digital push button (active LOW)
 
 // ── Sensor enable flags (node build only) ────────────────────────────────────
 // Auto-disabled for root build when ENABLE_DISPLAY is defined
 #ifndef ENABLE_DISPLAY
 // #define ENABLE_AHT10
-// #define ENABLE_POTENTIOMETER
+#define ENABLE_POTENTIOMETER
 #define ENABLE_BUTTON
 #endif
 
