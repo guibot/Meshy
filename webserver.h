@@ -68,6 +68,7 @@ static String _buildDataJson() {
     JsonObject node = arr.createNestedObject();
     node["node_id"]     = nd.nodeId;
     node["location"]    = nd.location;
+    node["mode"]        = nd.mode;
     node["last_seen_s"] = (millis() - nd.lastSeenMs) / 1000UL;
 
     JsonObject sensors = node.createNestedObject("sensors");

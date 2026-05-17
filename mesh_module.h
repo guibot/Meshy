@@ -9,6 +9,7 @@
 struct NodeData {
   String        nodeId;
   String        location;
+  String        mode          = "node";
   float         temperature   = NAN;
   float         humidity      = NAN;
   int           potentiometer = -1;
@@ -79,6 +80,7 @@ static void _onReceive(uint32_t from, String& msg) {
   NodeData nd;
   nd.nodeId        = doc["node_id"] | String(from, HEX);
   nd.location      = doc["location"] | "unknown";
+  nd.mode          = doc["mode"] | "node";
   nd.lastSeenMs    = millis();
   nd.rawJson       = msg;
 
