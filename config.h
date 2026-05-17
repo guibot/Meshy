@@ -14,13 +14,13 @@
 
 // ── Pins (node) ───────────────────────────────────────────────────────────────
 #define MODE_BUTTON_PIN   0    // hold LOW on boot → ROOT mode
-#define POT_PIN          34    // analog potentiometer
+#define POT_PIN          34    // analog potentiometer — ADC1 only (32-39); ADC2 conflicts with WiFi
 #define BUTTON_PIN       35    // digital push button (active LOW)
 
 // ── Sensor enable flags (node build only) ────────────────────────────────────
 // Auto-disabled for root build when ENABLE_DISPLAY is defined above
 #ifndef ENABLE_DISPLAY
-#define ENABLE_AHT10
+//#define ENABLE_AHT10
 #define ENABLE_POTENTIOMETER
 #define ENABLE_BUTTON
 #endif

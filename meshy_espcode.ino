@@ -16,22 +16,14 @@ String      wifiIP = "";
 
 void detectAndSaveMode() {
 #ifndef ENABLE_DISPLAY
-  // On plain ESP32, GPIO 0 is the BOOT button
+  // Hold GPIO 0 (BOOT button) on reset → ROOT for this boot only. No NVS persistence
+  // so the node always comes up as NODE unless button is held.
   pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
   delay(100);
-  bool buttonHeld = (digitalRead(MODE_BUTTON_PIN) == LOW);
-  prefs.begin("meshy", false);
-  if (buttonHeld) {
-    isRoot = true;
-    prefs.putBool("isRoot", true);
-    Serial.println("[Mode] Button held — saving ROOT mode to NVS");
-  } else {
-    isRoot = prefs.getBool("isRoot", false);
-  }
-  prefs.end();
+  isRoot = (digitalRead(MODE_BUTTON_PIN) == LOW);
+  if (isRoot) Serial.println("[Mode] Button held — ROOT mode");
 #else
-  // On M5Core2, always ROOT (display build = root build)
-  isRoot = true;
+  isRoot = true;  // display build always runs as ROOT (M5Core2)
 #endif
   Serial.printf("[Mode] Running as: %s\n", isRoot ? "ROOT" : "NODE");
 }
