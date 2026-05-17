@@ -6,7 +6,7 @@
 #define MESH_PORT       5555
 
 // ── Node identity (change per device) ────────────────────────────────────────
-#define NODE_LOCATION   "estufa_A"
+#define NODE_LOCATION   "CENTRAL"
 
 // ── Timing ────────────────────────────────────────────────────────────────────
 #define SEND_INTERVAL     30000   // ms between sensor broadcasts (node)
@@ -17,10 +17,13 @@
 #define POT_PIN          34    // analog potentiometer
 #define BUTTON_PIN       35    // digital push button (active LOW)
 
-// ── Sensor enable flags (node build) ─────────────────────────────────────────
+// ── Sensor enable flags (node build only) ────────────────────────────────────
+// Auto-disabled for root build when ENABLE_DISPLAY is defined above
+#ifndef ENABLE_DISPLAY
 #define ENABLE_AHT10
 #define ENABLE_POTENTIOMETER
 #define ENABLE_BUTTON
+#endif
 
 // ── Hardware profile (root build — M5Stack Core2) ─────────────────────────────
 // Uncomment both for root build; leave commented for node build
@@ -28,8 +31,8 @@
 // #define ENABLE_WEBSERVER   // ESPAsyncWebServer
 
 // ── WiFi (root only) ──────────────────────────────────────────────────────────
-#define WIFI_SSID       "your_wifi_ssid"
-#define WIFI_PASSWORD   "your_wifi_password"
+#define WIFI_SSID       "PATOMANSO"
+#define WIFI_PASSWORD   "n4om3l3mbr0123$"
 
 // ── MQTT — phase 2 (stub only for now) ───────────────────────────────────────
 #define MQTT_BROKER     "192.168.1.100"
