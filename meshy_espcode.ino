@@ -62,14 +62,15 @@ void setup() {
   Serial.println("\n[Boot] meshy_espcode starting...");
 
   detectAndSaveMode();
-  setupMesh(isRoot);
 
   if (isRoot) {
-    setupWiFi();
+    setupWiFi();      // connect STA first so mesh AP inherits the same WiFi channel
+    setupMesh(true);
     setupDisplay();
     setupWebServer();
     setupMQTT();
   } else {
+    setupMesh(false);
     setupSensors();
   }
 
