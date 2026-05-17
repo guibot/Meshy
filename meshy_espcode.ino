@@ -1,4 +1,3 @@
-#include <Preferences.h>
 #include "config.h"
 #include "mesh_module.h"
 #include "mqtt_stub.h"
@@ -8,22 +7,20 @@
 
 // ── Globals ───────────────────────────────────────────────────────────────────
 
-Preferences prefs;
-bool        isRoot = false;
-String      wifiIP = "";
+bool   isRoot = false;
+String wifiIP = "";
 
 // ── Mode detection ────────────────────────────────────────────────────────────
 
 void detectAndSaveMode() {
 #ifndef ENABLE_DISPLAY
-  // Hold GPIO 0 (BOOT button) on reset → ROOT for this boot only. No NVS persistence
-  // so the node always comes up as NODE unless button is held.
+  // Hold GPIO 0 on reset → ROOT for this session only (no NVS persistence)
   pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
   delay(100);
   isRoot = (digitalRead(MODE_BUTTON_PIN) == LOW);
   if (isRoot) Serial.println("[Mode] Button held — ROOT mode");
 #else
-  isRoot = true;  // display build always runs as ROOT (M5Core2)
+  isRoot = true;  // display build always ROOT (M5Core2)
 #endif
   Serial.printf("[Mode] Running as: %s\n", isRoot ? "ROOT" : "NODE");
 }
@@ -34,9 +31,6 @@ void detectAndSaveMode() {
 #include <WiFi.h>
 
 void setupWiFi() {
-  // painlessMesh runs WiFi in AP+STA mode. On root, after mesh.init() sets up the
-  // mesh AP, we connect the STA interface to external WiFi. mesh.setRoot(true)
-  // prevents painlessMesh from using STA to seek other roots.
   Serial.printf("[WiFi] Connecting to %s", WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   int attempts = 0;
@@ -60,7 +54,11 @@ void setupWiFi() {}
 
 void setup() {
   Serial.begin(115200);
-  delay(200);
+  // ESP32-C3 uses USB-CDC; wait up to 3s for the port to open
+  unsigned long t = millis();
+  while (!Serial && millis() - t < 3000);
+  delay(100);
+
   Serial.println("\n[Boot] meshy_espcode starting...");
 
   detectAndSaveMode();

@@ -1,5 +1,10 @@
 #pragma once
 
+// ── Hardware profile ──────────────────────────────────────────────────────────
+// Uncomment both for ROOT build (M5Stack Core2); leave commented for NODE build
+// #define ENABLE_DISPLAY     // M5Unified touch display
+// #define ENABLE_WEBSERVER   // ESPAsyncWebServer
+
 // ── Mesh ──────────────────────────────────────────────────────────────────────
 #define MESH_SSID       "meshy_net"
 #define MESH_PASSWORD   "meshy_pass"
@@ -13,22 +18,17 @@
 #define DISPLAY_INTERVAL   1000   // ms between display refresh (root)
 
 // ── Pins (node) ───────────────────────────────────────────────────────────────
-#define MODE_BUTTON_PIN   0    // hold LOW on boot → ROOT mode
-#define POT_PIN          34    // analog potentiometer — ADC1 only (32-39); ADC2 conflicts with WiFi
-#define BUTTON_PIN       35    // digital push button (active LOW)
+#define MODE_BUTTON_PIN   0    // hold LOW on boot → ROOT mode this session
+#define POT_PIN          34    // analog potentiometer — ADC1 only (32-39)
+#define BUTTON_PIN       10    // digital push button (active LOW)
 
 // ── Sensor enable flags (node build only) ────────────────────────────────────
-// Auto-disabled for root build when ENABLE_DISPLAY is defined above
+// Auto-disabled for root build when ENABLE_DISPLAY is defined
 #ifndef ENABLE_DISPLAY
-//#define ENABLE_AHT10
-#define ENABLE_POTENTIOMETER
+// #define ENABLE_AHT10
+// #define ENABLE_POTENTIOMETER
 #define ENABLE_BUTTON
 #endif
-
-// ── Hardware profile (root build — M5Stack Core2) ─────────────────────────────
-// Uncomment both for root build; leave commented for node build
-// #define ENABLE_DISPLAY     // M5Unified touch display
-// #define ENABLE_WEBSERVER   // ESPAsyncWebServer
 
 // ── WiFi (root only) ──────────────────────────────────────────────────────────
 #define WIFI_SSID       "PATOMANSO"
