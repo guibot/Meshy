@@ -48,10 +48,22 @@ static void _drawNodeRow(int y, const NodeData& nd, bool online) {
   M5.Display.drawFastHLine(0, y + _ROW_H - 1, 320, dimColor);
   M5.Display.setTextSize(1);
 
-  // Line 1: location + elapsed
+  // Line 1: location | hop dots | elapsed
   M5.Display.setTextColor(nameColor);
   M5.Display.setCursor(4, y + 5);
-  M5.Display.printf("%-18s", nd.location.c_str());
+  M5.Display.printf("%-14s", nd.location.c_str());
+
+  // Hop indicator: filled dots for each hop (max 4 shown), dim if unknown
+  M5.Display.setTextColor(online ? TFT_CYAN : dimColor);
+  if (nd.hopCount > 0) {
+    int dots = min(nd.hopCount, 4);
+    for (int d = 0; d < dots; d++) M5.Display.print("\xb7");  // · middle dot
+    if (nd.hopCount > 4) M5.Display.print("+");
+  } else {
+    M5.Display.print("?");
+  }
+  M5.Display.print(" ");
+
   M5.Display.setTextColor(dimColor);
   M5.Display.print(_fmtElapsed(nd.lastSeenMs));
 

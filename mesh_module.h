@@ -14,7 +14,8 @@ struct NodeData {
   float         humidity      = NAN;
   int           potentiometer = -1;
   bool          button        = false;
-  unsigned long lastSeenMs    = 0;   // millis() on root at time of receipt
+  unsigned long lastSeenMs    = 0;
+  int           hopCount      = -1;  // hops from root; -1 = unknown, 1 = direct
   String        rawJson;
 };
 
@@ -92,10 +93,32 @@ static void _onReceive(uint32_t from, String& msg) {
     if (!s["button"].isNull())        nd.button        = s["button"].as<bool>();
   }
 
+  // preserve hopCount — set by topology parser, not by the node's own message
+  auto existing = nodeRegistry.find(from);
+  if (existing != nodeRegistry.end()) nd.hopCount = existing->second.hopCount;
+
   nodeRegistry[from] = nd;
 }
 
+// Recursively walk subConnectionJson tree, storing depth as hopCount per node
+static void _parseHops(JsonObjectConst node, int depth) {
+  uint32_t id = node["nodeId"].as<uint32_t>();
+  auto it = nodeRegistry.find(id);
+  if (it != nodeRegistry.end()) it->second.hopCount = depth;
+  JsonArrayConst subs = node["subs"].as<JsonArrayConst>();
+  for (JsonObjectConst sub : subs) _parseHops(sub, depth + 1);
+}
+
 static void _onChanged() {
-  Serial.printf("[Mesh] Topology changed — %d node(s)\n",
-    (int)_mesh.getNodeList().size());
+  int count = (int)_mesh.getNodeList().size();
+  Serial.printf("[Mesh] Topology changed — %d node(s)\n", count);
+
+  // Parse full topology tree — root is depth 0, direct nodes depth 1, etc.
+  String topoJson = _mesh.subConnectionJson(true);
+  Serial.printf("[Mesh] Topology: %s\n", topoJson.c_str());
+
+  DynamicJsonDocument doc(2048);
+  if (deserializeJson(doc, topoJson) == DeserializationError::Ok) {
+    _parseHops(doc.as<JsonObjectConst>(), 0);
+  }
 }
