@@ -2,8 +2,8 @@
 
 // ── Hardware profile ──────────────────────────────────────────────────────────
 // Uncomment both for ROOT build (M5Stack Core2); leave commented for NODE build
-// #define ENABLE_DISPLAY     // M5Unified touch display
-// #define ENABLE_WEBSERVER   // ESPAsyncWebServer
+ #define ENABLE_DISPLAY     // M5Unified touch display
+ #define ENABLE_WEBSERVER   // ESPAsyncWebServer
 
 // ── Mesh ──────────────────────────────────────────────────────────────────────
 #define MESH_SSID       "meshy_net"
@@ -11,11 +11,12 @@
 #define MESH_PORT       5555
 
 // ── Node identity (change per device) ────────────────────────────────────────
-#define NODE_LOCATION   "CENTRAL"
+#define NODE_LOCATION   "02_BT_Pot"
 
 // ── Timing ────────────────────────────────────────────────────────────────────
 #define SEND_INTERVAL     5000   // ms between sensor broadcasts (node)
 #define DISPLAY_INTERVAL   1000   // ms between display refresh (root)
+#define NODE_TIMEOUT      (SEND_INTERVAL * 3)  // ms without data → node marked offline
 
 // ── Pins (node) ───────────────────────────────────────────────────────────────
 #define MODE_BUTTON_PIN   0    // hold LOW on boot → ROOT mode this session
