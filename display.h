@@ -81,10 +81,16 @@ static void _drawNodeRow(int y, const NodeData& nd, bool online) {
     M5.Display.print("OFFLINE");
   }
 
-  // Line 3: node id
+  // Line 3: node id + relay name if multi-hop
   M5.Display.setTextColor(dimColor);
   M5.Display.setCursor(4, y + 38);
-  M5.Display.print(nd.nodeId);
+  if (nd.hopCount > 1 && nd.parentId != 0) {
+    auto relay = nodeRegistry.find(nd.parentId);
+    String relayName = (relay != nodeRegistry.end()) ? relay->second.location : String(nd.parentId, HEX);
+    M5.Display.printf("%s via:%s", nd.nodeId.c_str(), relayName.c_str());
+  } else {
+    M5.Display.print(nd.nodeId);
+  }
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────

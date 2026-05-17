@@ -16,6 +16,7 @@ struct NodeData {
   bool          button        = false;
   unsigned long lastSeenMs    = 0;
   int           hopCount      = -1;  // hops from root; -1 = unknown, 1 = direct
+  uint32_t      parentId     = 0;   // direct parent node in mesh tree; 0 = root
   String        rawJson;
 };
 
@@ -95,18 +96,24 @@ static void _onReceive(uint32_t from, String& msg) {
 
   // preserve hopCount — set by topology parser, not by the node's own message
   auto existing = nodeRegistry.find(from);
-  if (existing != nodeRegistry.end()) nd.hopCount = existing->second.hopCount;
+  if (existing != nodeRegistry.end()) {
+    nd.hopCount = existing->second.hopCount;
+    nd.parentId = existing->second.parentId;
+  }
 
   nodeRegistry[from] = nd;
 }
 
 // Recursively walk subConnectionJson tree, storing depth as hopCount per node
-static void _parseHops(JsonObjectConst node, int depth) {
+static void _parseHops(JsonObjectConst node, int depth, uint32_t parentId) {
   uint32_t id = node["nodeId"].as<uint32_t>();
   auto it = nodeRegistry.find(id);
-  if (it != nodeRegistry.end()) it->second.hopCount = depth;
+  if (it != nodeRegistry.end()) {
+    it->second.hopCount = depth;
+    it->second.parentId = parentId;
+  }
   JsonArrayConst subs = node["subs"].as<JsonArrayConst>();
-  for (JsonObjectConst sub : subs) _parseHops(sub, depth + 1);
+  for (JsonObjectConst sub : subs) _parseHops(sub, depth + 1, id);
 }
 
 static void _onChanged() {
@@ -119,6 +126,6 @@ static void _onChanged() {
 
   DynamicJsonDocument doc(2048);
   if (deserializeJson(doc, topoJson) == DeserializationError::Ok) {
-    _parseHops(doc.as<JsonObjectConst>(), 0);
+    _parseHops(doc.as<JsonObjectConst>(), 0, 0);
   }
 }

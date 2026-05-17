@@ -32,8 +32,7 @@
 #endif
 
 // ── WiFi (root only) ──────────────────────────────────────────────────────────
-#define WIFI_SSID       "PATOMANSO"
-#define WIFI_PASSWORD   "n4om3l3mbr0123$"
+#include "wifi_secrets.h"  // copy wifi_secrets_template.h → wifi_secrets.h and fill in credentials
 
 // ── MQTT — phase 2 (stub only for now) ───────────────────────────────────────
 #define MQTT_BROKER     "192.168.1.100"
