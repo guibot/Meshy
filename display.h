@@ -48,24 +48,10 @@ static void _drawNodeRow(int y, const NodeData& nd, bool online) {
   M5.Display.drawFastHLine(0, y + _ROW_H - 1, 320, dimColor);
   M5.Display.setTextSize(1);
 
-  // Line 1: location | hop dots | elapsed
+  // Line 1: location
   M5.Display.setTextColor(nameColor);
   M5.Display.setCursor(4, y + 5);
   M5.Display.printf("%-14s", nd.location.c_str());
-
-  // Hop indicator: filled dots for each hop (max 4 shown), dim if unknown
-  M5.Display.setTextColor(online ? TFT_CYAN : dimColor);
-  if (nd.hopCount > 0) {
-    int dots = min(nd.hopCount, 4);
-    for (int d = 0; d < dots; d++) M5.Display.print("\xb7");  // · middle dot
-    if (nd.hopCount > 4) M5.Display.print("+");
-  } else {
-    M5.Display.print("?");
-  }
-  M5.Display.print(" ");
-
-  M5.Display.setTextColor(dimColor);
-  M5.Display.print(_fmtElapsed(nd.lastSeenMs));
 
   // Line 2: sensor values or OFFLINE label
   M5.Display.setCursor(4, y + 22);
@@ -74,8 +60,10 @@ static void _drawNodeRow(int y, const NodeData& nd, bool online) {
     if (!isnan(nd.temperature))  M5.Display.printf("%.1fC ", nd.temperature);
     if (!isnan(nd.humidity))     M5.Display.printf("%.0f%% ", nd.humidity);
     if (nd.potentiometer >= 0)   M5.Display.printf("pot:%d ", nd.potentiometer);
-    M5.Display.setTextColor(nd.button ? TFT_YELLOW : TFT_DARKGREY);
-    M5.Display.printf("btn:%s", nd.button ? "ON" : "OFF");
+    if (nd.hasButton) {
+      M5.Display.setTextColor(nd.button ? TFT_YELLOW : TFT_DARKGREY);
+      M5.Display.printf("btn:%s", nd.button ? "ON" : "OFF");
+    }
   } else {
     M5.Display.setTextColor((uint16_t)0x6B4D);  // muted orange-red
     M5.Display.print("OFFLINE");
@@ -91,6 +79,26 @@ static void _drawNodeRow(int y, const NodeData& nd, bool online) {
   } else {
     M5.Display.print(nd.nodeId);
   }
+
+  // Elapsed time centered above circle
+  String elapsedStr = _fmtElapsed(nd.lastSeenMs);
+  int elapsedW = M5.Display.textWidth(elapsedStr);
+  M5.Display.setTextColor(dimColor);
+  M5.Display.setCursor(300 - elapsedW / 2, y + 5);
+  M5.Display.print(elapsedStr);
+
+  // Status circle + hop count (right side): green <1s, blue <10s, grey >=10s
+  unsigned long elapsed = millis() - nd.lastSeenMs;
+  uint16_t circleColor;
+  if      (elapsed < 1000)  circleColor = TFT_GREEN;
+  else if (elapsed < 10000) circleColor = TFT_BLUE;
+  else                      circleColor = TFT_DARKGREY;
+  M5.Display.fillCircle(309, y + _ROW_H / 2 - 1, 8, circleColor);
+
+  // Hop label left of circle
+  M5.Display.setTextColor(online ? TFT_CYAN : dimColor);
+  M5.Display.setCursor(268, y + _ROW_H / 2 - 4);
+  if (nd.hopCount > 0) M5.Display.printf("%dhop", nd.hopCount);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -130,7 +138,7 @@ void updateDisplay(const String& ip) {
     bool aOn = _isOnline(*a);
     bool bOn = _isOnline(*b);
     if (aOn != bOn) return aOn;  // online before offline
-    return a->lastSeenMs > b->lastSeenMs;  // newer first within group
+    return a->insertOrder < b->insertOrder;  // stable order within each group
   });
 
   int total = (int)sorted.size();

@@ -7,17 +7,17 @@
 
 // ── Globals ───────────────────────────────────────────────────────────────────
 
-bool   isRoot = true;
+bool   isRoot = false;
 String wifiIP = "";
 
 // ── Mode detection ────────────────────────────────────────────────────────────
 
 void detectAndSaveMode() {
 #ifndef ENABLE_DISPLAY
-  // Hold GPIO 0 on reset → ROOT for this session only (no NVS persistence)
-  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
+  // Hold BUTTON_PIN on reset → ROOT for this session only (no NVS persistence)
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   delay(100);
-  isRoot = (digitalRead(MODE_BUTTON_PIN) == LOW);
+  isRoot = (digitalRead(BUTTON_PIN) == LOW);
   if (isRoot) Serial.println("[Mode] Button held — ROOT mode");
 #else
   isRoot = true;  // display build always ROOT (M5Core2)

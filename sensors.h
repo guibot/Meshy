@@ -22,14 +22,14 @@ struct SensorData {
 
 void setupSensors() {
 #ifdef ENABLE_AHT10
-  Wire.begin();
+  Wire.begin(PIN_SDA, PIN_SCL);
   _ahtOk = _aht.begin();
   Serial.printf("[Sensors] AHT10 %s\n", _ahtOk ? "OK" : "FAILED — check wiring");
 #endif
 
 #ifdef ENABLE_POTENTIOMETER
-  pinMode(POT_PIN, INPUT);
-  Serial.printf("[Sensors] Potentiometer on GPIO%d\n", POT_PIN);
+  pinMode(ANALOG_PIN, INPUT);
+  Serial.printf("[Sensors] Potentiometer on GPIO%d\n", ANALOG_PIN);
 #endif
 
 #ifdef ENABLE_BUTTON
@@ -53,7 +53,7 @@ SensorData readSensors() {
 #endif
 
 #ifdef ENABLE_POTENTIOMETER
-  data.potentiometer = analogRead(POT_PIN);
+  data.potentiometer = analogRead(ANALOG_PIN);
 #endif
 
 #ifdef ENABLE_BUTTON

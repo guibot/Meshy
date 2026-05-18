@@ -14,9 +14,11 @@ struct NodeData {
   float         humidity      = NAN;
   int           potentiometer = -1;
   bool          button        = false;
+  bool          hasButton     = false;
   unsigned long lastSeenMs    = 0;
   int           hopCount      = -1;  // hops from root; -1 = unknown, 1 = direct
-  uint32_t      parentId     = 0;   // direct parent node in mesh tree; 0 = root
+  uint32_t      parentId      = 0;   // direct parent node in mesh tree; 0 = root
+  int           insertOrder   = 0;   // stable display position; assigned once on first seen
   String        rawJson;
 };
 
@@ -25,7 +27,8 @@ struct NodeData {
 // directly, so they share the same definition in the single translation unit.
 
 static painlessMesh            _mesh;
-std::map<uint32_t, NodeData>   nodeRegistry;  // root only
+std::map<uint32_t, NodeData>   nodeRegistry;   // root only
+static int                     _nextOrder = 0;
 
 // ── Forward declarations ──────────────────────────────────────────────────────
 
@@ -91,14 +94,17 @@ static void _onReceive(uint32_t from, String& msg) {
     if (!s["temperature"].isNull())   nd.temperature   = s["temperature"].as<float>();
     if (!s["humidity"].isNull())      nd.humidity      = s["humidity"].as<float>();
     if (!s["potentiometer"].isNull()) nd.potentiometer = s["potentiometer"].as<int>();
-    if (!s["button"].isNull())        nd.button        = s["button"].as<bool>();
+    if (!s["button"].isNull())        { nd.hasButton = true; nd.button = s["button"].as<bool>(); }
   }
 
-  // preserve hopCount — set by topology parser, not by the node's own message
+  // preserve hopCount and stable display order; assign insertOrder once on first seen
   auto existing = nodeRegistry.find(from);
   if (existing != nodeRegistry.end()) {
-    nd.hopCount = existing->second.hopCount;
-    nd.parentId = existing->second.parentId;
+    nd.hopCount    = existing->second.hopCount;
+    nd.parentId    = existing->second.parentId;
+    nd.insertOrder = existing->second.insertOrder;
+  } else {
+    nd.insertOrder = _nextOrder++;
   }
 
   nodeRegistry[from] = nd;
@@ -119,6 +125,14 @@ static void _parseHops(JsonObjectConst node, int depth, uint32_t parentId) {
 static void _onChanged() {
   int count = (int)_mesh.getNodeList().size();
   Serial.printf("[Mesh] Topology changed — %d node(s)\n", count);
+
+  // Grace period: bump lastSeenMs for all online nodes so mesh reformation
+  // doesn't trigger false offline while the network reconnects
+  unsigned long now = millis();
+  for (auto& kv : nodeRegistry) {
+    if ((now - kv.second.lastSeenMs) < NODE_TIMEOUT)
+      kv.second.lastSeenMs = now;
+  }
 
   // Parse full topology tree — root is depth 0, direct nodes depth 1, etc.
   String topoJson = _mesh.subConnectionJson(true);
