@@ -12,25 +12,12 @@ Hardware: M5Stack Core2 (root gateway) + ESP32 devkits (sensor nodes).
 
 | Target | Board | config.h flags |
 |---|---|---|
-| Root | M5Stack Core2 | `#define ENABLE_DISPLAY` + `#define ENABLE_WEBSERVER` |
-| Node | ESP32 Dev Module | both commented out |
+| Root | M5Stack Core2 | `#define IS_ROOT` |
+| Node | M5Atom / ESP32-C3 SuperMini / XIAO C3 / XIAO S3 | `IS_ROOT` commented out, `BOARD_xxx` uncommented |
 
-## Compile (arduino-cli)
+## Build
 
-```bash
-# Node build
-arduino-cli compile --fqbn esp32:esp32:esp32 meshy_espcode/
-
-# Root build
-arduino-cli compile --fqbn m5stack:esp32:m5stack_core2 meshy_espcode/
-```
-
-## Flash
-
-```bash
-arduino-cli upload -p <PORT> --fqbn <FQBN> meshy_espcode/
-# List ports: arduino-cli board list
-```
+Arduino IDE. Select board under Tools → Board, edit `config.h`, upload.
 
 ## Module Responsibilities
 

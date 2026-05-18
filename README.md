@@ -4,44 +4,35 @@ Distributed sensor mesh network for agricultural/industrial monitoring, built on
 
 ## Hardware
 
-| Role | Board | Notes |
-|---|---|---|
-| Root gateway | M5Stack Core2 | Touch display, web dashboard, WiFi uplink |
-| Sensor node | ESP32-C3 Super Mini | Potentiometer, push button, AHT10 (optional) |
+| Role | Board |
+|---|---|
+| Root gateway | M5Stack Core2 |
+| Sensor node | M5Stack Atom, ESP32-C3 Super Mini, XIAO ESP32-C3, XIAO ESP32-S3 |
 
 ## Features
 
 - Self-healing mesh — nodes auto-route through each other if out of direct range
-- Root display shows all nodes: location, sensor values, hop count, last-seen time
-- Multi-hop relay name shown for nodes not directly connected to root
+- Root display shows all nodes: location, sensor values, hop count, last-seen
+- Per-node status circle: green (active), blue (idle), grey (offline)
 - Offline detection — stale nodes sorted to bottom and flagged OFFLINE
 - Web dashboard at root IP (`/` — live table, `/data` — JSON)
 - WiFi + mesh coexist on root (painlessMesh AP+STA mode)
 
-## Build
+## Build (Arduino IDE)
 
-```bash
-# Node build (ESP32-C3)
-arduino-cli compile --fqbn esp32:esp32:esp32c3 meshy_espcode/
-
-# Root build (M5Stack Core2)
-arduino-cli compile --fqbn m5stack:esp32:m5stack_core2 meshy_espcode/
-```
-
-Flash:
-```bash
-arduino-cli upload -p <PORT> --fqbn <FQBN> meshy_espcode/
-# List ports: arduino-cli board list
-```
+1. Open `meshy_espcode.ino` in Arduino IDE
+2. Select the correct board under **Tools → Board**
+3. Edit `config.h` (see below) then upload
 
 ## Configuration
 
 Edit `config.h` before flashing:
 
+- `IS_ROOT` — uncomment for root build (M5Stack Core2); leave commented for nodes
+- `BOARD_xxx` — uncomment the board being flashed (one at a time)
 - `NODE_LOCATION` — unique label per device (shown on display and dashboard)
-- `MESH_SSID` / `MESH_PASSWORD` — shared across all nodes
-- `WIFI_SSID` / `WIFI_PASSWORD` — external WiFi for root
-- `ENABLE_DISPLAY` + `ENABLE_WEBSERVER` — uncomment both for root build; leave commented for node build
+- `MESH_SSID` / `MESH_PASSWORD` — shared across all devices
+- `WIFI_SSID` / `WIFI_PASSWORD` — external WiFi for root only
 - `SEND_INTERVAL` — how often nodes broadcast sensor data (ms)
 
 ## Module Map
